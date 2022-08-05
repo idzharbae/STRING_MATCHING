@@ -40,6 +40,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("Search city suburb: ")
+	text, _ := reader.ReadString('\n')
+	// text := "tabanan baturit"
+
+	now := time.Now()
+
 	rows, err := db.Query("SELECT suburb_id, city_name, suburb_name FROM suburb LEFT JOIN city ON suburb.city_id = city.city_id;")
 	if err != nil {
 		log.Fatal(err)
@@ -70,12 +77,6 @@ func main() {
 
 	cm := NewLevenshteinMatcher(suburbNames)
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("Search city suburb: ")
-	text, _ := reader.ReadString('\n')
-	// text := "tabanan baturit"
-
-	now := time.Now()
 	matches := cm.ClosestN(text, 3)
 
 	for _, match := range matches {
