@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -20,6 +22,11 @@ type Suburb struct {
 }
 
 func main() {
+	re, err := regexp.Compile(`[^\w ]`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cfg := mysql.Config{
 		User:                 "user",
 		Passwd:               "password",
@@ -28,8 +35,6 @@ func main() {
 		DBName:               "shipper",
 		AllowNativePasswords: true,
 	}
-	// Get a database handle.
-	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		log.Fatal(err)
@@ -51,12 +56,15 @@ func main() {
 			log.Fatal(err)
 		}
 
-		suburbNames = append(suburbNames, result.CityName+" "+result.SuburbName)
-		if _, ok := cnt[result.CityName+" "+result.SuburbName]; ok {
-			cnt[result.CityName+" "+result.SuburbName] += 1
-			fmt.Println(result.CityName + " " + result.SuburbName)
+		citySuburb := result.CityName + " " + result.SuburbName
+		citySuburb = strings.ToLower(citySuburb)
+		citySuburb = re.ReplaceAllString(citySuburb, "")
+		suburbNames = append(suburbNames, citySuburb)
+		if _, ok := cnt[citySuburb]; ok {
+			cnt[citySuburb] += 1
+			fmt.Println(citySuburb)
 		} else {
-			cnt[result.CityName+" "+result.SuburbName] = 1
+			cnt[citySuburb] = 1
 		}
 	}
 
@@ -71,7 +79,7 @@ func main() {
 	matches := cm.ClosestN(text, 3)
 
 	for _, match := range matches {
-		fmt.Println(match)
+		fmt.Println(match.value, match.score)
 	}
 
 	fmt.Println("Time elapsed:", time.Since(now))

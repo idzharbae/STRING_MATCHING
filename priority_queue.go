@@ -4,6 +4,7 @@ package main
 type Item struct {
 	value    string // The value of the item; arbitrary.
 	priority int    // The priority of the item in the queue.
+	score    float64
 	// The index is needed by update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }
@@ -14,8 +15,7 @@ type PriorityQueue []*Item
 func (pq PriorityQueue) Len() int { return len(pq) }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	// Higher score is popped first
-	return pq[i].priority > pq[j].priority
+	return pq[i].score < pq[j].score
 }
 
 func (pq PriorityQueue) Swap(i, j int) {

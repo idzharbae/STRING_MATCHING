@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/heap"
+	"math"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func (cm *LevenshteinMatcher) Closest(searchWord string) string {
 	return bestWord
 }
 
-func (cm *LevenshteinMatcher) ClosestN(searchWord string, N int) []string {
+func (cm *LevenshteinMatcher) ClosestN(searchWord string, N int) []Item {
 	searchWord = strings.ToLower(searchWord)
 	pq := make(PriorityQueue, 0)
 	heap.Init(&pq)
@@ -46,6 +47,7 @@ func (cm *LevenshteinMatcher) ClosestN(searchWord string, N int) []string {
 			heap.Push(&pq, &Item{
 				value:    currentWord,
 				priority: currentDist,
+				score:    1 - (float64(currentDist) / float64(math.Max(float64(len(currentWord)), float64(len(searchWord))))),
 			})
 
 			continue
@@ -54,15 +56,16 @@ func (cm *LevenshteinMatcher) ClosestN(searchWord string, N int) []string {
 		heap.Push(&pq, &Item{
 			value:    currentWord,
 			priority: currentDist,
+			score:    1 - (float64(currentDist) / float64(math.Max(float64(len(currentWord)), float64(len(searchWord))))),
 		})
 
 		heap.Pop(&pq)
 	}
 
-	result := make([]string, 0, N)
+	result := make([]Item, 0, N)
 	for len(pq) > 0 {
 		top := heap.Pop(&pq)
-		result = append([]string{top.(*Item).value}, result...)
+		result = append([]Item{*top.(*Item)}, result...)
 	}
 
 	return result
